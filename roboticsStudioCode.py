@@ -12,12 +12,11 @@ def main():
     controller = lewansoul_lx16a.ServoController(
         serial.Serial(SERIAL_PORT, 115200, timeout=1),
     )
-
     try:
-        servo1 = controller.servo(1) #top right
-        servo2 = controller.servo(2) #bottom left
-        servo3 = controller.servo(3)
-        servo4 = controller.servo(4)
+        servo1 = controller.servo(1) #bottom left
+        servo2 = controller.servo(2) #top left
+        servo3 = controller.servo(3) #top right
+        servo4 = controller.servo(4) #bottom right
 
 
     except ServoTimeoutError as e:
@@ -25,17 +24,30 @@ def main():
         exit()
 
 
-
     t = 0
+    k = 0
+    while k < 1:
+        time.sleep(1)
+        servo3.move(135) #more negative means it goes more forward for this servo
+        time.sleep(3)
+        servo2.move(-200)
+        time.sleep(3)
+        servo4.move(200)
+        # k += 1
+
+
     while True:
     # Oscillate servos out of phase
     # Parametric locomotion method
-        servo1.move(sin(t) * 120 + 180)
-        # servo2.move(cos(t) * 120 + 180)
-        # servo3.move(cos(t) * 120 - 180)
-        # servo4.move(cos(t) * 120 + 180)
+        #servo1.move(sin(t) * 120 - 180)
+
+        #servo1.move(1)
+        #servo3.move(50)
+        #servo2.move(sin(t) * 120 + 180)
+        #servo3.move(cos(t) * 120 - 180)
+        #servo4.move(sin(t) * 120 + 180)
         # time.sleep(0.05)
-        # t += 0.05
+        t += 0.05
 
 #def walk():
     #Use keyrframing
@@ -66,18 +78,20 @@ def getPositions():
     s = serial.Serial('/dev/cu.usbserial-1420', 115200, timeout=1)
     c = ServoController(s, timeout=5)
 
-
     servo1_id = 1
     # servo2_id = 2
     # servo3_id = 3
     # servo4_id = 4
 
-    # servo1_pos =  c.get_positions([servo1_id])
+    #servo1_pos =  c.get_positions([servo1_id])
+    #servo1_pos = lx16a.get_physical_angle(servo1)
+    #servo1_pos = servo1.get_physical_angle()
     # servo2_pos =  c.get_positions([servo2_id])
     # servo3_pos =  c.get_positions([servo3_id])
     # servo4_pos =  c.get_positions([servo4_id])
 
-    print(c.get_positions([servo1_id]))
+    #print(c.get_positions([servo1_id]))
+    print(servo1_pos)
 
 
 def homing_routine():
@@ -112,15 +126,43 @@ def homing_routine():
     while LX16A.getPhysicalPos(servo4) != initial_servo4_pos:
         servo4.move(initial_servo4_pos)
 
-
-def boot_test():
-
+def shutdown_routine():
     SERIAL_PORT = '/dev/cu.usbserial-14340'
+
+    #set initial motor positions
+    end_servo1_pos = 0
+    end_servo2_pos = 90
+    end_servo3_pos = 90
+    end_servo4_pos = 0
 
     controller = lewansoul_lx16a.ServoController(
         serial.Serial(SERIAL_PORT, 115200, timeout=1),
     )
 
+    try:
+        servo1 = controller.servo(1)
+        servo2 = controller.servo(2)
+        servo3 = controller.servo(3)
+        servo4 = controller.servo(4)
+
+    except ServoTimeoutError as e:
+        print(f"Servo {e.id_} is not responding. Exiting...")
+        exit()
+
+    while LX16A.getPhysicalPos(servo1) != end_servo1_pos:
+        servo1.move(end_servo1_pos)
+    while LX16A.getPhysicalPos(servo2) != end_servo2_pos:
+        servo2.move(end_servo2_pos)
+    while LX16A.getPhysicalPos(servo3) != end_servo3_pos:
+        servo3.move(end_servo3_pos)
+    while LX16A.getPhysicalPos(servo4) != end_servo4_pos:
+        servo4.move(end_servo4_pos)
+
+def boot_test():
+    SERIAL_PORT = '/dev/cu.usbserial-14340'
+    controller = lewansoul_lx16a.ServoController(
+        serial.Serial(SERIAL_PORT, 115200, timeout=1),
+    )
     try:
         servo1 = controller.servo(1)
         servo2 = controller.servo(2)
